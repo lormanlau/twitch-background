@@ -1,42 +1,48 @@
 import logo from "./logo.svg";
 import './App.css';
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 
 const clientId = 'jzrppcr9rjx38gwy84w3v6s56t0v2t';
 const redirectURI = 'https://lormanlau.github.io/twitch-background/';
 const scope = 'channel:read:redemptions';
 
+const getRandomInt = () => {
+  return Math.floor(Math.random() * 256);
+}
+
+const hexToRgb = (hex) => {
+  var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  return result ? {
+    r: parseInt(result[1], 16),
+    g: parseInt(result[2], 16),
+    b: parseInt(result[3], 16)
+  } : {
+    r: 0,
+    g: 0,
+    b: 0
+  }
+}
+
 function App() {
   const [ready, setReady] = useState(false);
+  const [demo, setDemo] = useState(true);
   const [_authUrl, setAuthUrl] = useState("/twitch-background");
   const [left, setLeft] = useState({ r: 84, g: 58, b: 183 })
   const [right, setRight] = useState({ r: 0, g: 172, b: 193 })
-  var ws;
-
-  var hexToRgb = (hex) => {
-    var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-    return result ? {
-      r: parseInt(result[1], 16),
-      g: parseInt(result[2], 16),
-      b: parseInt(result[3], 16)
-    } : {
-      r: 0,
-      g: 0,
-      b: 0
-    }
-  }
+  var ws = useRef()
 
   /* for testing to generate random colors */
   useEffect(() => {
-    function getRandomInt() {
-      return Math.floor(Math.random() * 256);
+    let clock;
+    if (demo) {
+      clock = setInterval(() => {
+        setLeft({ r: getRandomInt(), g: getRandomInt(), b: getRandomInt() })
+        setRight({ r: getRandomInt(), g: getRandomInt(), b: getRandomInt() })
+      }, 5000);
     }
-    let clock = setInterval(() => {
-      setLeft({r: getRandomInt(), g: getRandomInt(), b: getRandomInt()})
-      setRight({r: getRandomInt(), g: getRandomInt(), b: getRandomInt()})
-    }, 5000);
-    return (() => {clearInterval(clock)}) 
-  }, [])
+    return (() => { clearInterval(clock) })
+  }, [demo])
+
 
   var parseFragment = (hash) => {
     var hashMatch = function (expr) {
@@ -48,7 +54,7 @@ function App() {
       sessionStorage.twitchOAuthToken = hashMatch(/access_token=(\w+)/);
   };
 
-  var authUrl = () => {
+  var authUrl = useCallback(() => {
     sessionStorage.twitchOAuthState = nonce(15);
     var url = 'https://id.twitch.tv/oauth2/authorize' +
       '?response_type=token' +
@@ -57,7 +63,7 @@ function App() {
       '&state=' + sessionStorage.twitchOAuthState +
       '&scope=' + scope;
     return url
-  }
+  }, [])
 
   var nonce = (length) => {
     var text = "";
@@ -72,43 +78,52 @@ function App() {
     let message = {
       type: 'PING'
     }
-    ws.send(JSON.stringify(message));
+    ws.current.send(JSON.stringify(message));
   }
 
-  var connect = () => {
+  var connect = useCallback(() => {
     var heartbeatInterval = 1000 * 60;
     var reconnectInterval = 1000 * 3;
     var heartbeatHandle;
 
-    ws = new WebSocket('wss://pubsub-edge.twitch.tv');
+    ws.current = new WebSocket('wss://pubsub-edge.twitch.tv');
 
-    ws.onopen = function (event) {
+    ws.current.onopen = function (event) {
       console.log(new Date().toLocaleString(), 'INFO: Socket Opened');
       heartbeat();
       heartbeatHandle = setInterval(heartbeat, heartbeatInterval);
     };
 
-    ws.onerror = function (error) {
+    ws.current.onerror = function (error) {
       console.error(new Date().toLocaleString(), 'ERR:', error);
     };
 
-    ws.onmessage = function (event) {
+    ws.current.onmessage = function (event) {
       let message = JSON.parse(event.data);
       console.log('RECV:', message);
       if (message.type === 'RECONNECT') {
         console.log(new Date().toLocaleString(), 'INFO: Reconnecting...');
         setTimeout(connect, reconnectInterval);
       }
+      if (message.type === 'reward-redeemed') {
+        let color = message.data.redemption.user_input
+        let rgbValue = hexToRgb(color)
+        if (message.data.reward.title.includes("left")) {
+          setLeft(rgbValue);
+        } else if (message.reward.title.includes("right")) {
+          setRight(rgbValue);
+        }
+      }
     };
 
-    ws.onclose = function () {
-      console.log(new Date().toLocaleString(),'INFO: Socket Closed');
+    ws.current.onclose = function () {
+      console.log(new Date().toLocaleString(), 'INFO: Socket Closed');
       clearInterval(heartbeatHandle);
       console.log(new Date().toLocaleString(), 'INFO: Reconnecting...');
       setTimeout(connect, reconnectInterval);
     };
 
-  }
+  }, [ws])
 
   useEffect(() => {
     if (document.location.hash.match(/access_token=(\w+)/))
@@ -116,11 +131,12 @@ function App() {
     if (sessionStorage.twitchOAuthToken) {
       connect();
       setReady(true)
+      setDemo(false)
     } else {
       setAuthUrl(authUrl());
       setReady(false)
     }
-  }, []);
+  }, [authUrl, connect]);
 
   return (
     <div className="header" style={{ background: `linear-gradient(60deg, rgba(${left.r},${left.g},${left.b}) 0%, rgba(${right.r},${right.g},${right.b}) 100%)` }}>
