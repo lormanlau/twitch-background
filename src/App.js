@@ -26,7 +26,7 @@ function App() {
     }
   }
 
-  // for testing to generate random colors
+  /* for testing to generate random colors */
   useEffect(() => {
     function getRandomInt() {
       return Math.floor(Math.random() * 256);
@@ -83,28 +83,28 @@ function App() {
     ws = new WebSocket('wss://pubsub-edge.twitch.tv');
 
     ws.onopen = function (event) {
-      console.log('INFO: Socket Opened');
+      console.log(new Date().toLocaleString(), 'INFO: Socket Opened');
       heartbeat();
       heartbeatHandle = setInterval(heartbeat, heartbeatInterval);
     };
 
     ws.onerror = function (error) {
-      console.error('ERR:', error);
+      console.error(new Date().toLocaleString(), 'ERR:', error);
     };
 
     ws.onmessage = function (event) {
       let message = JSON.parse(event.data);
       console.log('RECV:', message);
       if (message.type === 'RECONNECT') {
-        console.log('INFO: Reconnecting...');
+        console.log(new Date().toLocaleString(), 'INFO: Reconnecting...');
         setTimeout(connect, reconnectInterval);
       }
     };
 
     ws.onclose = function () {
-      console.log('INFO: Socket Closed');
+      console.log(new Date().toLocaleString(),'INFO: Socket Closed');
       clearInterval(heartbeatHandle);
-      console.log('INFO: Reconnecting...');
+      console.log(new Date().toLocaleString(), 'INFO: Reconnecting...');
       setTimeout(connect, reconnectInterval);
     };
 
