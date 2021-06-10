@@ -74,7 +74,7 @@ function App() {
       }
     })
       .then(res => res.json())
-      .then(data => { console.log(data) })
+      .then(data => data.data[0].id)
   }
 
   var nonce = (length) => {
@@ -94,7 +94,7 @@ function App() {
         auth_token: sessionStorage.twitchOAuthToken
       }
     };
-    console.log(new Date.toLocaleString(), 'SENT:', message);
+    console.log(new Date().toLocaleString(), 'SENT:', message);
     ws.send(JSON.stringify(message));
   }
 
@@ -128,7 +128,8 @@ function App() {
       if (message.type === "PONG") {
         if (!connected) {
           getUserId()
-            .then(() => {
+            .then((channelId) => {
+              listen(channelId)
               setConnected(true);
             })
         }
