@@ -85,7 +85,7 @@ function App() {
     }
     return text;
   }
-  var listen = (channelId) => {
+  var listen = useCallback((channelId) => {
     let message = {
       type: 'LISTEN',
       nonce: nonce(15),
@@ -95,8 +95,8 @@ function App() {
       }
     };
     console.log(new Date().toLocaleString(), 'SENT:', message);
-    ws.send(JSON.stringify(message));
-  }
+    ws.current.send(JSON.stringify(message));
+  }, []);
 
   var heartbeat = () => {
     let message = {
@@ -157,7 +157,7 @@ function App() {
       setConnected(false)
     };
 
-  }, [ws])
+  }, [connected, ws, listen])
 
   useEffect(() => {
     if (document.location.hash.match(/access_token=(\w+)/))
