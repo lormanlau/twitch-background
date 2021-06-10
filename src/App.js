@@ -8,7 +8,7 @@ const scope = 'channel:read:redemptions';
 
 function App() {
   const [ready, setReady] = useState(false);
-  const [authUrl, setAuthUrl] = useState("/twitch-background");
+  const [_authUrl, setAuthUrl] = useState("/twitch-background");
   var ws;
 
   var parseFragment = (hash) => {
@@ -116,7 +116,7 @@ function App() {
           <div className="row">
             <div style={{display: ready ? "none" : "block"}}className="auth text-center">
               <p>First, connect with your Twitch Account:</p>
-              <a id="auth-link"><img src={logo} alt="logo" /></a>
+              <a id="auth-link" src={_authUrl}><img src={logo} alt="logo" /></a>
             </div>
           </div>
         </div>
