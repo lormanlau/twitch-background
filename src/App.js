@@ -9,7 +9,34 @@ const scope = 'channel:read:redemptions';
 function App() {
   const [ready, setReady] = useState(false);
   const [_authUrl, setAuthUrl] = useState("/twitch-background");
+  const [left, setLeft] = useState({ r: 84, g: 58, b: 183 })
+  const [right, setRight] = useState({ r: 0, g: 172, b: 193 })
   var ws;
+
+  var hexToRgb = (hex) => {
+    var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+    return result ? {
+      r: parseInt(result[1], 16),
+      g: parseInt(result[2], 16),
+      b: parseInt(result[3], 16)
+    } : {
+      r: 0,
+      g: 0,
+      b: 0
+    }
+  }
+
+  // for testing to generate random colors
+  useEffect(() => {
+    function getRandomInt() {
+      return Math.floor(Math.random() * 256);
+    }
+    let clock = setInterval(() => {
+      setLeft({r: getRandomInt(), g: getRandomInt(), b: getRandomInt()})
+      setRight({r: getRandomInt(), g: getRandomInt(), b: getRandomInt()})
+    }, 5000);
+    return (() => {clearInterval(clock)}) 
+  }, [])
 
   var parseFragment = (hash) => {
     var hashMatch = function (expr) {
@@ -48,21 +75,8 @@ function App() {
     ws.send(JSON.stringify(message));
   }
 
-  var listen = (topic) => {
-    let message = {
-      type: 'LISTEN',
-      nonce: nonce(15),
-      data: {
-        topics: [topic],
-        auth_token: sessionStorage.twitchOAuthToken
-      }
-    };
-    console.log('SENT:',message);
-    ws.send(JSON.stringify(message));
-  }
-
   var connect = () => {
-    var heartbeatInterval = 1000 * 60; 
+    var heartbeatInterval = 1000 * 60;
     var reconnectInterval = 1000 * 3;
     var heartbeatHandle;
 
@@ -75,12 +89,12 @@ function App() {
     };
 
     ws.onerror = function (error) {
-      console.error('ERR:',error);
+      console.error('ERR:', error);
     };
 
     ws.onmessage = function (event) {
       let message = JSON.parse(event.data);
-      console.log('RECV:',message);
+      console.log('RECV:', message);
       if (message.type === 'RECONNECT') {
         console.log('INFO: Reconnecting...');
         setTimeout(connect, reconnectInterval);
@@ -106,14 +120,14 @@ function App() {
       setAuthUrl(authUrl());
       setReady(false)
     }
-  },[]);
+  }, []);
 
   return (
-    <div className="header">
+    <div className="header" style={{ background: `linear-gradient(60deg, rgba(${left.r},${left.g},${left.b}) 0%, rgba(${right.r},${right.g},${right.b}) 100%)` }}>
       <div className="inner-header flex">
         <div className="container">
           <div className="row">
-            <div style={{display: ready ? "none" : "block"}}className="auth text-center">
+            <div style={{ display: ready ? "none" : "block" }} className="auth text-center">
               <p>First, connect with your Twitch Account:</p>
               <a id="auth-link" href={_authUrl}><img src={logo} alt="logo" /></a>
             </div>
