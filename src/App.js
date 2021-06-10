@@ -101,15 +101,16 @@ function App() {
     if (sessionStorage.twitchOAuthToken) {
       connect();
       heartbeat();
+      setReady(true)
     }
-  });
+  },[]);
 
   return (
     <div className="header">
       <div className="inner-header flex">
         <div className="container">
           <div className="row">
-            <div className="auth text-center">
+            <div style={{display: ready ? "none" : "block"}}className="auth text-center">
               <p>First, connect with your Twitch Account:</p>
               <a id="auth-link" href={!sessionStorage.twitchOAuthToken && authUrl()}><img src={logo} alt="logo" /></a>
             </div>
