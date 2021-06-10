@@ -112,7 +112,7 @@ function App() {
           <div className="row">
             <div style={{display: ready ? "none" : "block"}}className="auth text-center">
               <p>First, connect with your Twitch Account:</p>
-              <a id="auth-link" href={!sessionStorage.twitchOAuthToken && authUrl()}><img src={logo} alt="logo" /></a>
+              <a id="auth-link" href={!sessionStorage.twitchOAuthState && authUrl()}><img src={logo} alt="logo" /></a>
             </div>
           </div>
         </div>
