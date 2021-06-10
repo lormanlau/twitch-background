@@ -4,7 +4,7 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 
 const clientId = 'jzrppcr9rjx38gwy84w3v6s56t0v2t';
 const redirectURI = 'https://lormanlau.github.io/twitch-background/';
-const scope = 'channel:read:redemptions';
+const scope = 'channel:read:redemptions%20user:read:email';
 
 const getRandomInt = () => {
   return Math.floor(Math.random() * 256);
@@ -26,6 +26,7 @@ const hexToRgb = (hex) => {
 function App() {
   const [ready, setReady] = useState(false);
   const [demo, setDemo] = useState(true);
+  const [connected, setConnected] = useState(false);
   const [_authUrl, setAuthUrl] = useState("/twitch-background");
   const [left, setLeft] = useState({ r: 84, g: 58, b: 183 })
   const [right, setRight] = useState({ r: 0, g: 172, b: 193 })
@@ -65,6 +66,17 @@ function App() {
     return url
   }, [])
 
+  var getUserId = () => {
+    return fetch("https://api.twitch.tv/helix/users", {
+      headers: {
+        Authorization: `Bearer ${sessionStorage.twitchOAuthToken}`,
+        "Client-Id": clientId
+      }
+    })
+      .then(res => res.json())
+      .then(data => { console.log(data) })
+  }
+
   var nonce = (length) => {
     var text = "";
     var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
@@ -72,6 +84,18 @@ function App() {
       text += possible.charAt(Math.floor(Math.random() * possible.length));
     }
     return text;
+  }
+  var listen = (channelId) => {
+    let message = {
+      type: 'LISTEN',
+      nonce: nonce(15),
+      data: {
+        topics: [`channel-points-channel-v1.${channelId}`],
+        auth_token: sessionStorage.twitchOAuthToken
+      }
+    };
+    console.log(new Date.toLocaleString(), 'SENT:', message);
+    ws.send(JSON.stringify(message));
   }
 
   var heartbeat = () => {
@@ -100,7 +124,15 @@ function App() {
 
     ws.current.onmessage = function (event) {
       let message = JSON.parse(event.data);
-      console.log('RECV:', message);
+      console.log(new Date().toLocaleString(), 'RECV:', message);
+      if (message.type === "PONG") {
+        if (!connected) {
+          getUserId()
+            .then(() => {
+              setConnected(true);
+            })
+        }
+      }
       if (message.type === 'RECONNECT') {
         console.log(new Date().toLocaleString(), 'INFO: Reconnecting...');
         setTimeout(connect, reconnectInterval);
@@ -121,6 +153,7 @@ function App() {
       clearInterval(heartbeatHandle);
       console.log(new Date().toLocaleString(), 'INFO: Reconnecting...');
       setTimeout(connect, reconnectInterval);
+      setConnected(false)
     };
 
   }, [ws])
