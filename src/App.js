@@ -8,6 +8,7 @@ const scope = 'channel:read:redemptions';
 
 function App() {
   const [ready, setReady] = useState(false);
+  const [authUrl, setAuthUrl] = useState("/twitch-background");
   var ws;
 
   var parseFragment = (hash) => {
@@ -22,7 +23,7 @@ function App() {
 
   var authUrl = () => {
     sessionStorage.twitchOAuthState = nonce(15);
-    var url = 'https://api.twitch.tv/kraken/oauth2/authorize' +
+    var url = 'https://id.twitch.tv/oauth2/authorize' +
       '?response_type=token' +
       '&client_id=' + clientId +
       '&redirect_uri=' + redirectURI +
@@ -102,6 +103,9 @@ function App() {
       connect();
       heartbeat();
       setReady(true)
+    } else {
+      setAuthUrl(authUrl());
+      setReady(false)
     }
   },[]);
 
@@ -112,7 +116,7 @@ function App() {
           <div className="row">
             <div style={{display: ready ? "none" : "block"}}className="auth text-center">
               <p>First, connect with your Twitch Account:</p>
-              <a id="auth-link" href={!sessionStorage.twitchOAuthState && authUrl()}><img src={logo} alt="logo" /></a>
+              <a id="auth-link"><img src={logo} alt="logo" /></a>
             </div>
           </div>
         </div>
