@@ -61,8 +61,8 @@ function App() {
   }
 
   var connect = () => {
-    var heartbeatInterval = 1000 * 60; //ms between PING's
-    var reconnectInterval = 1000 * 3; //ms to wait before reconnect
+    var heartbeatInterval = 1000 * 60; 
+    var reconnectInterval = 1000 * 3;
     var heartbeatHandle;
 
     ws = new WebSocket('wss://pubsub-edge.twitch.tv');
@@ -100,15 +100,7 @@ function App() {
       parseFragment(document.location.hash);
     if (sessionStorage.twitchOAuthToken) {
       connect();
-      fetch("https://api.twitch.tv/kraken/user", {
-        method: "GET",
-        headers: {
-          "Client-ID": clientId,
-          "Authorization": "OAuth " + sessionStorage.twitchOAuthToken
-        }
-      }).then(function (user) {
-        console.log(user)
-      });
+      heartbeat();
     }
   });
 
