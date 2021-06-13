@@ -1,8 +1,8 @@
 {
   "files": {
-    "main.css": "/twitch-background/static/css/main.2bb91b4d.chunk.css",
-    "main.js": "/twitch-background/static/js/main.c6167b30.chunk.js",
-    "main.js.map": "/twitch-background/static/js/main.c6167b30.chunk.js.map",
+    "main.css": "/twitch-background/static/css/main.0da7d053.chunk.css",
+    "main.js": "/twitch-background/static/js/main.1895c4b2.chunk.js",
+    "main.js.map": "/twitch-background/static/js/main.1895c4b2.chunk.js.map",
     "runtime-main.js": "/twitch-background/static/js/runtime-main.eb2991f7.js",
     "runtime-main.js.map": "/twitch-background/static/js/runtime-main.eb2991f7.js.map",
     "static/js/2.70f81a4b.chunk.js": "/twitch-background/static/js/2.70f81a4b.chunk.js",
@@ -10,14 +10,14 @@
     "static/js/3.184adf3f.chunk.js": "/twitch-background/static/js/3.184adf3f.chunk.js",
     "static/js/3.184adf3f.chunk.js.map": "/twitch-background/static/js/3.184adf3f.chunk.js.map",
     "index.html": "/twitch-background/index.html",
-    "static/css/main.2bb91b4d.chunk.css.map": "/twitch-background/static/css/main.2bb91b4d.chunk.css.map",
+    "static/css/main.0da7d053.chunk.css.map": "/twitch-background/static/css/main.0da7d053.chunk.css.map",
     "static/js/2.70f81a4b.chunk.js.LICENSE.txt": "/twitch-background/static/js/2.70f81a4b.chunk.js.LICENSE.txt",
     "static/media/logo.6ce24c58.svg": "/twitch-background/static/media/logo.6ce24c58.svg"
   },
   "entrypoints": [
     "static/js/runtime-main.eb2991f7.js",
     "static/js/2.70f81a4b.chunk.js",
-    "static/css/main.2bb91b4d.chunk.css",
-    "static/js/main.c6167b30.chunk.js"
+    "static/css/main.0da7d053.chunk.css",
+    "static/js/main.1895c4b2.chunk.js"
   ]
 }
