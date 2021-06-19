@@ -133,6 +133,8 @@ function App() {
 
     ws.current.onmessage = function (event) {
       let message = JSON.parse(event.data);
+      var data = message.data && message.data.message;
+      if (data) message = JSON.parse(data);
       console.log(new Date().toLocaleString(), "RECV:", message);
       if (message.type === "PONG") {
         if (!connected) {
@@ -149,9 +151,9 @@ function App() {
       if (message.type === "reward-redeemed") {
         let color = message.data.redemption.user_input;
         let rgbValue = hexToRgb(color);
-        if (message.data.reward.title.includes("left")) {
+        if (message.data.redemption.reward.title.includes("left")) {
           setLeft(rgbValue);
-        } else if (message.reward.title.includes("right")) {
+        } else if (message.data.redemption.reward.title.includes("right")) {
           setRight(rgbValue);
         }
       }
